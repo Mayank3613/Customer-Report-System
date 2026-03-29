@@ -17,16 +17,16 @@ const AddReport = () => {
     const navigate = useNavigate();
 
     const reportTemplates = [
-        { name: "Billing Issue", title: "Incorrect Charge / Billing Discrepancy", desc: "Customer reported an unexpected charge on their last invoice. Needs immediate review." },
-        { name: "Technical Support", title: "Platform Log-in Failure", desc: "Customer is unable to log into the dashboard. Tried resetting password but error persists." },
-        { name: "Account Inquiry", title: "Upgrade Plan Inquiry", desc: "Customer interested in upgrading to the Enterprise tier. Wants to know pricing differences." },
-        { name: "Complaint", title: "Service Downtime Complaint", desc: "Customer experienced significant latency/downtime yesterday resulting in lost work." }
+        { name: "Billing Issue", title: "Incorrect Charge / Billing Discrepancy", desc: "Customer reported an unexpected charge on their last invoice. Needs immediate review.", priority: "High" },
+        { name: "Technical Support", title: "Platform Log-in Failure", desc: "Customer is unable to log into the dashboard. Tried resetting password but error persists.", priority: "High" },
+        { name: "Account Inquiry", title: "Upgrade Plan Inquiry", desc: "Customer interested in upgrading to the Enterprise tier. Wants to know pricing differences.", priority: "Medium" },
+        { name: "Complaint", title: "Service Downtime Complaint", desc: "Customer experienced significant latency/downtime yesterday resulting in lost work.", priority: "Critical" }
     ];
 
     const applyTemplate = (e) => {
         const t = reportTemplates.find(temp => temp.name === e.target.value);
         if (t) {
-            setFormData(prev => ({ ...prev, title: t.title, description: t.desc }));
+            setFormData(prev => ({ ...prev, title: t.title, description: t.desc, priority: t.priority }));
         }
     };
 
@@ -55,6 +55,7 @@ const AddReport = () => {
             headers: { Authorization: `Bearer ${token}` }
         });
 
+        alert("Report submitted successfully!");
         navigate('/staff');
     };
 

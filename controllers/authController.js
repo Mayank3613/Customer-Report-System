@@ -76,6 +76,8 @@ const getMe = async (req, res) => {
             _id: req.user.id,
             name: req.user.name,
             email: req.user.email,
+            phone: req.user.phone,
+            notifications: req.user.notifications,
             role: req.user.role
         };
 
@@ -161,10 +163,41 @@ const resetPassword = async (req, res) => {
     });
 };
 
+const updateProfile = async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id);
+
+        if (user) {
+            user.name = req.body.name || user.name;
+            user.email = req.body.email || user.email;
+            user.phone = req.body.phone !== undefined ? req.body.phone : user.phone;
+            user.notifications = req.body.notifications !== undefined ? req.body.notifications : user.notifications;
+
+            const updatedUser = await user.save();
+            await logAudit(user._id, 'Profile Update', `${user.name} updated their profile settings.`);
+
+            res.json({
+                _id: updatedUser._id,
+                name: updatedUser.name,
+                email: updatedUser.email,
+                phone: updatedUser.phone,
+                notifications: updatedUser.notifications,
+                role: updatedUser.role,
+                token: generateToken(updatedUser._id)
+            });
+        } else {
+            res.status(404).json({ message: 'User not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 module.exports = {
     registerUser,
     loginUser,
     getMe,
+    updateProfile,
     forgotPassword,
     resetPassword
 };

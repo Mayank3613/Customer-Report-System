@@ -183,6 +183,27 @@ Built with **React**, utilizing `react-router-dom` for navigation and `axios` fo
 - Wraps the app in `AuthProvider` for global state.
 - Defines **Protected Routes** to restrict access based on user roles.
 
+#### **`components/ProtectedRoute.js`**
+**Role:** Access Control Guard.
+- Wraps sensitive routes to ensure only authenticated users with correct roles (Admin/Staff) can access them.
+- Redirects unauthorized users to the login page or their respective dashboard.
+
+#### **`components/Sidebar.js`**
+**Role:** Main Navigation.
+- A collapsible side menu that displays different links based on the user's role.
+- Stores its collapsed state in `localStorage` for a consistent UI experience.
+
+#### **`components/Topbar.js`**
+**Role:** Header & Global Actions.
+- Displays the current page title.
+- Includes a **Global Search** bar for quick customer lookup.
+- Features a **Notifications** dropdown for SLA alerts and task reminders.
+
+#### **`components/ExportButtons.js`**
+**Role:** Data Portability.
+- Provides "Export PDF" and "Export Excel" functionality for tables and reports.
+- Uses `jspdf` and `xlsx` libraries for client-side file generation.
+
 #### **`context/AuthContext.js`**
 **Role:** Global State Management for Authentication.
 - Stores `user` object and `token`.
@@ -195,32 +216,62 @@ Built with **React**, utilizing `react-router-dom` for navigation and `axios` fo
 
 #### **`pages/admin/AdminDashboard.js`**
 **Role:** Command Center for Admins.
-- **Data Fetching:** Calls `/api/dashboard/stats`.
-- **Charts:** Renders Pie Chart (Risk) and Bar Chart (Report Status).
-- **Metrics:** Displays Total Customers, Active Issues, High Risk Accounts, MRR.
+- **Data Visualization:** Displays KPIs (Customers, High-Risk, MRR) and charts (Risk Distribution, Report Status).
+- **Automation:** Includes calls to logic aggregates for real-time performance tracking.
 
-#### `pages/admin/SmartInsight.js`
+#### **`pages/admin/SmartInsight.js`**
 **Role:** AI Risk Engine UI.
 - **Button:** "Run Risk Analysis Model" triggers the backend algorithm.
 - **Display:** Renders color-coded "Insight Cards" with AI recommendations and risk factor tags.
 
-#### `pages/admin/AuditLogs.js`
-**Role:** Compliance & Oversight UI.
-- Displays system-wide administrative actions.
-- Features advanced filtering by Action Type, Agent Role, and Date Range.
+#### **`pages/admin/AuditLogs.js`**
+**Role:** Compliance & Oversight.
+- Displays a searchable trail of all system-wide administrative actions.
+- Features advanced filtering by agent role, action type, and date range.
 
-#### `pages/CustomerProfile.js`
+#### **`pages/admin/Reports.js`**
+**Role:** Central Ticket Tracker.
+- Displays all customer issues with advanced filtering (Priority, Status, Date).
+- Supports **Bulk Actions** (Multiselect to resolve or export tickets).
+- Highlights **SLA Violations** for tickets older than 48 hours.
+
+#### **`pages/admin/CustomerManagement.js`**
+**Role:** Master Directory Control.
+- Allows admins to register new clients or edit existing profiles.
+- Features real-time validation and automatic **CLV (Customer Lifetime Value)** estimation.
+
+#### **`pages/CustomerProfile.js`**
 **Role:** 360-Degree Customer View.
 - Displays Health Score, LTV, and Personal Info.
 - **Interaction History**: Integrated form to log calls, emails, and notes.
-- **Customer Audit Trail**: Filtered view of administrative changes related to this customer.
+- **Customer Audit Trail**: Filtered view of administrative changes related to this specific customer.
 
 #### **`pages/staff/StaffDashboard.js`**
 **Role:** Simplified Workspace for Staff.
-- Focuses on "Assigned Customers" and "Pending Reports".
+- Focuses on "Assigned Customers" and "Pending Reports" for daily tasks.
+
+#### **`pages/staff/CustomerList.js`**
+**Role:** Personal Workspace for Staff.
+- Displays assigned client portfolios in either **Grid** or **Table** view.
+- Provides shortcuts for creating reports or scheduled follow-ups.
+
+#### **`pages/staff/StaffReports.js`**
+**Role:** Task Management UI.
+- Includes a **Kanban Board** for visual workflow (Open -> In Progress -> Resolved).
+- Allows staff to track their personal resolution metrics.
+
+#### **`pages/staff/Profile.js`**
+**Role:** Personal Accountability.
+- Displays user access levels and profile completion stats.
+- Shows a timeline of the user's recent administrative actions.
 
 #### **`pages/Login.js` / `Register.js`**
 - Standard authentication forms linked to `AuthContext`.
+- Handles secure redirects upon successful login based on user role.
+
+#### **`pages/ForgotPassword.js` / `ResetPassword.js`**
+- Self-service recovery flow for forgotten passwords.
+- Secure token-based reset utility.
 
 ---
 
@@ -255,6 +306,11 @@ These standalone scripts help with database management, seeding, and verificatio
 **Role:** Background Automation.
 - **Daily (8 AM)**: Scans for overdue pending payments and logs alerts.
 - **Weekly (Friday 5 PM)**: Generates a system summary report and sends an email to the admin.
+
+#### `utils/sendEmail.js`
+**Role:** Email Delivery Utility.
+- Uses `nodemailer` to send automated emails (e.g., password resets).
+- Configured via SMTP settings in the `.env` file.
 
 ---
 
@@ -369,22 +425,18 @@ These standalone scripts help with database management, seeding, and verificatio
 
 ---
 
-## 8. Frontend Architecture & Logic
+## 8. Design System & Global Styles
 
-### **Context & State Management**
-#### **`AuthContext.js`**
-- **`checkUserLoggedIn()`**: Runs on app load. Checks `localStorage` for a token. If found, verifies it with the `/api/auth/me` endpoint.
-- **`login(email, password)`**: Authenticates user, stores token in `localStorage`, and updates global state.
-- **`register(userData)`**: Creates a new user account and automatically logs them in.
-- **`logout()`**: Clears token from storage and resets user state.
+The system uses a modern **Glassmorphism** design language with a focus on deep colors and sleek transparency.
 
-### **Page Logic**
-#### **`AdminDashboard.js`**
-- **Data Visualization**:
-    - **Risk Distribution (Pie)**: Maps `stats.riskDistribution` to a 3-color scheme (Green/Yellow/Red).
-    - **Report Status (Bar)**: Visualizes `stats.reportStatusDistribution`.
-- **Formatting**: Uses `Intl.NumberFormat` for INR currency display.
+#### **`theme.css`**
+- **Token System:** Defines the core color palette (`--bg-primary`, `--accent-primary`, etc.) and typography across the app.
+- Ensures a consistent "Premium Dark Mode" look.
 
-#### **`Staff/AddReport.js`**
-- **Customer Lookup**: Fetches the full customer list on load. When a user selects a customer ID, the system automatically finds and attaches the `customerName` before sending the data to the API.
+#### **`App.css`**
+- **Layout Logic:** Manages the main dashboard shell, sidebar transitions, and responsive grid layouts.
+- **Glass Effects:** Contains reusable CSS classes for the translucent "Glass Card" effect used in dashboards.
+
+#### **`index.css`**
+- **Base Styles:** Standardizes font rendering (Inter/Outfit), scrollbars, and core reset properties.
 

@@ -290,6 +290,9 @@ const Reports = () => {
                                     Current Status: <strong style={{ color: 'var(--text-primary)' }}>{selectedReportForModal.status}</strong>
                                 </div>
                                 <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                    {selectedReportForModal.status === 'Open' && (
+                                        <button onClick={() => handleSingleStatusUpdate(selectedReportForModal._id, 'In Progress')} className="btn btn-sm" style={{ background: '#f59e0b', color: 'white', padding: '0.5rem 1rem', borderRadius: '6px', border: 'none', cursor: 'pointer' }}>Set In Progress</button>
+                                    )}
                                     {selectedReportForModal.status !== 'Resolved' && (
                                         <button onClick={() => handleSingleStatusUpdate(selectedReportForModal._id, 'Resolved')} className="btn btn-sm" style={{ background: '#10b981', color: 'white', padding: '0.5rem 1rem', borderRadius: '6px', border: 'none', cursor: 'pointer' }}>Mark Resolved ✓</button>
                                     )}

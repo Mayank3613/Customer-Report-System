@@ -1,14 +1,17 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import Topbar from '../../components/Topbar';
 
 const CustomerList = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const querySearch = new URLSearchParams(location.search).get('search');
+    
     const [customers, setCustomers] = useState([]);
     const [reports, setReports] = useState([]);
-    const [searchQuery, setSearchQuery] = useState('');
+    const [searchQuery, setSearchQuery] = useState(querySearch || '');
     const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'table'
     
     // Filters
@@ -20,6 +23,12 @@ const CustomerList = () => {
     const [newCustomer, setNewCustomer] = useState({
         name: '', email: '', contact: '', status: 'Active'
     });
+
+    useEffect(() => {
+        if (querySearch) {
+            setSearchQuery(querySearch);
+        }
+    }, [querySearch]);
 
     useEffect(() => {
         fetchData();
@@ -55,11 +64,9 @@ const CustomerList = () => {
         }
     };
 
-    // Filter logic
     const filteredCustomers = customers.filter(c => {
         const matchesSearch = c.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                              c.email.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                              c.status.toLowerCase().includes(searchQuery.toLowerCase());
+                              c.email.toLowerCase().includes(searchQuery.toLowerCase());
         const matchesStatus = filterStatus === 'All' || c.status === filterStatus;
         const matchesRisk = filterRisk === 'All' || c.riskScore === filterRisk;
         const matchesSegment = filterSegment === 'All' || c.segment === filterSegment;
@@ -163,7 +170,7 @@ const CustomerList = () => {
                                 <div style={{ display: 'flex', gap: '0.5rem', marginTop: 'auto' }}>
                                     <Link to={`/customer/${c._id}`} className="btn btn-sm" style={{ flex: 1, textAlign: 'center', background: 'rgba(99, 102, 241, 0.2)', color: '#818cf8', textDecoration: 'none', padding: '0.6rem 0', borderRadius: '6px', fontWeight: 'bold' }}>Details</Link>
                                     <Link to={`/staff/add-report`} state={{ customerId: c._id }} className="btn btn-sm" style={{ flex: 1, textAlign: 'center', background: 'rgba(16, 185, 129, 0.2)', color: '#10b981', textDecoration: 'none', padding: '0.6rem 0', borderRadius: '6px', fontWeight: 'bold' }}>+ Report</Link>
-                                    <button className="btn btn-sm" style={{ flex: 1, background: 'rgba(245, 158, 11, 0.2)', color: '#f59e0b', border: 'none', padding: '0.6rem 0', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }} onClick={() => navigate(`/customer/${c._id}`)}>Follow-up</button>
+                                    <a href={`mailto:${c.email}`} className="btn btn-sm" style={{ flex: 1, textAlign: 'center', background: 'rgba(245, 158, 11, 0.2)', color: '#f59e0b', textDecoration: 'none', padding: '0.6rem 0', borderRadius: '6px', fontWeight: 'bold' }}>Follow-up</a>
                                 </div>
                             </div>
                         )})}

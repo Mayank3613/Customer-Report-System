@@ -96,7 +96,7 @@ const Topbar = ({ title }) => {
                                 </div>
                             </div>
                             <div style={{ textAlign: 'center', marginTop: '1rem' }}>
-                                <button style={{ background: 'transparent', border: 'none', color: '#818cf8', cursor: 'pointer', fontSize: '0.8rem' }}>Mark all as read</button>
+                                <button onClick={() => setShowNotifications(false)} style={{ background: 'transparent', border: 'none', color: '#818cf8', cursor: 'pointer', fontSize: '0.8rem' }}>Mark all as read</button>
                             </div>
                         </div>
                     )}

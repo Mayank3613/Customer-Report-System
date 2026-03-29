@@ -1,4 +1,5 @@
 import { useContext, useState } from 'react';
+import axios from 'axios';
 import AuthContext from '../../context/AuthContext';
 import Sidebar from '../../components/Sidebar';
 import Topbar from '../../components/Topbar';
@@ -22,10 +23,18 @@ const Profile = () => {
         return score;
     };
 
-    const handleSave = () => {
-        // Mock save logic, backend required for actual PUT
-        setEditMode(false);
-        alert('Profile details saved (frontend simulated).');
+    const handleSave = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            await axios.put('/api/auth/profile', formData, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            alert('Profile details saved successfully!');
+            setEditMode(false);
+        } catch (error) {
+            console.error('Failed to update profile', error);
+            alert('Failed to update profile.');
+        }
     };
 
     return (
@@ -145,26 +154,7 @@ const Profile = () => {
                             </div>
                         </div>
 
-                        {/* Bottom Full Width: Activity Log */}
-                        <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '2rem', marginTop: '2rem' }}>
-                            <h3 style={{ marginBottom: '1.5rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}><span>⚡</span> My Recent Activity</h3>
-                            <div style={{ background: 'rgba(0,0,0,0.2)', borderRadius: '8px', padding: '1rem' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.8rem', borderBottom: '1px dashed rgba(255,255,255,0.05)' }}>
-                                    <div>
-                                        <strong style={{ color: '#818cf8', display: 'block' }}>Updated Customer Profile</strong>
-                                        <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Changed status of 'Acme Corp' from Inactive to Active.</span>
-                                    </div>
-                                    <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Today, 10:30 AM</span>
-                                </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.8rem' }}>
-                                    <div>
-                                        <strong style={{ color: '#10b981', display: 'block' }}>Resolved Report</strong>
-                                        <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Ticket #1024 marked as resolved.</span>
-                                    </div>
-                                    <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Yesterday, 4:15 PM</span>
-                                </div>
-                            </div>
-                        </div>
+
 
                     </div>
                 </div>
