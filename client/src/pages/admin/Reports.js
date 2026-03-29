@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import axios from 'axios';
+import API from '../../utils/api';
 import Sidebar from '../../components/Sidebar';
 import Topbar from '../../components/Topbar';
 import ExportButtons from '../../components/ExportButtons';
@@ -26,9 +26,7 @@ const Reports = () => {
         if (filters.endDate) queryStr += `endDate=${filters.endDate}&`;
 
         try {
-            const { data } = await axios.get(`/api/reports${queryStr}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const { data } = await API.get(`/api/reports${queryStr}`);
             setReports(data);
         } catch (error) {
             console.error(error);
@@ -83,9 +81,7 @@ const Reports = () => {
         const token = localStorage.getItem('token');
         try {
             await Promise.all(selectedReports.map(id => 
-                axios.put(`/api/reports/${id}`, { status: newStatus }, {
-                    headers: { Authorization: `Bearer ${token}` }
-                })
+                API.put(`/api/reports/${id}`, { status: newStatus })
             ));
             fetchReports();
             setSelectedReports([]);
@@ -97,9 +93,7 @@ const Reports = () => {
     const handleSingleStatusUpdate = async (id, newStatus) => {
         const token = localStorage.getItem('token');
         try {
-            await axios.put(`/api/reports/${id}`, { status: newStatus }, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            await API.put(`/api/reports/${id}`, { status: newStatus });
             fetchReports();
             setSelectedReportForModal(null);
         } catch (error) {

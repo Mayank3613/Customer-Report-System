@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import axios from 'axios';
+import API from '../../utils/api';
 import { Link } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import Topbar from '../../components/Topbar';
@@ -28,9 +28,7 @@ const CustomerManagement = () => {
     const fetchCustomers = async () => {
         try {
             const token = localStorage.getItem('token');
-            const { data } = await axios.get('/api/customers', {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const { data } = await API.get('/api/customers');
             setCustomers(data);
         } catch (error) {
             console.error("Failed to fetch customers", error);
@@ -62,15 +60,11 @@ const CustomerManagement = () => {
 
         try {
             if (editMode && currentEditId) {
-                await axios.put(`/api/customers/${currentEditId}`, payload, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                await API.put(`/api/customers/${currentEditId}`, payload);
                 setEditMode(false);
                 setCurrentEditId(null);
             } else {
-                await axios.post('/api/customers', payload, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                await API.post('/api/customers', payload);
             }
             fetchCustomers();
             resetForm();
@@ -101,9 +95,7 @@ const CustomerManagement = () => {
         if (!window.confirm("Are you sure you want to deactivate this client? They will no longer be considered 'Active' but history will be preserved.")) return;
         const token = localStorage.getItem('token');
         try {
-            await axios.put(`/api/customers/${id}`, { status: 'Inactive' }, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            await API.put(`/api/customers/${id}`, { status: 'Inactive' });
             fetchCustomers();
         } catch (error) {
             console.error("Deactivation failed", error);

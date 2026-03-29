@@ -1,5 +1,5 @@
 import { useContext, useState } from 'react';
-import axios from 'axios';
+import API from '../../utils/api';
 import AuthContext from '../../context/AuthContext';
 import Sidebar from '../../components/Sidebar';
 import Topbar from '../../components/Topbar';
@@ -26,9 +26,7 @@ const Profile = () => {
     const handleSave = async () => {
         try {
             const token = localStorage.getItem('token');
-            await axios.put('/api/auth/profile', formData, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            await API.put('/api/auth/profile', formData);
             alert('Profile details saved successfully!');
             setEditMode(false);
         } catch (error) {

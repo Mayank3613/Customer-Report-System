@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import API from '../../utils/api';
 import { Link } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import Topbar from '../../components/Topbar';
@@ -30,9 +30,7 @@ const StaffReports = () => {
             if (filters.startDate) queryStr += `startDate=${filters.startDate}&`;
             if (filters.endDate) queryStr += `endDate=${filters.endDate}&`;
 
-            const { data } = await axios.get(`/api/reports${queryStr}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const { data } = await API.get(`/api/reports${queryStr}`);
             setReports(data);
         } catch (error) {
             console.error('Failed to fetch reports', error);
@@ -63,9 +61,7 @@ const StaffReports = () => {
             const token = localStorage.getItem('token');
             // Assuming the backend has a way to update sequentially or we map promises
             await Promise.all(selectedReports.map(id => 
-                axios.put(`/api/reports/${id}`, { status: 'Resolved' }, {
-                    headers: { Authorization: `Bearer ${token}` }
-                })
+                API.put(`/api/reports/${id}`, { status: 'Resolved' })
             ));
             setSelectedReports([]);
             fetchReports();

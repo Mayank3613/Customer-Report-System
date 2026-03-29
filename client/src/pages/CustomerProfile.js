@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import axios from 'axios';
+import API from '../utils/api';
 import Sidebar from '../components/Sidebar';
 
 const CustomerProfile = () => {
@@ -20,12 +20,10 @@ const CustomerProfile = () => {
     const fetchCustomerData = async () => {
         try {
             const token = localStorage.getItem('token');
-            const headers = { Authorization: `Bearer ${token}` };
-
             const [custRes, repRes, intRes] = await Promise.all([
-                axios.get(`/api/customers/${id}`, { headers }),
-                axios.get(`/api/reports?customerId=${id}`, { headers }),
-                axios.get(`/api/interactions/${id}`, { headers })
+                API.get(`/api/customers/${id}`),
+                API.get(`/api/reports?customerId=${id}`),
+                API.get(`/api/interactions/${id}`)
             ]);
 
             setCustomer(custRes.data);
@@ -34,7 +32,7 @@ const CustomerProfile = () => {
 
             // Attempt to fetch audit logs securely
             try {
-                const auditRes = await axios.get('/api/audit', { headers });
+                const auditRes = await API.get('/api/audit');
                 // Filter audit logs mapping to this customer (since details contain names)
                 const relevantAudits = auditRes.data.filter(log => log.details.includes(custRes.data.name));
                 setAuditLogs(relevantAudits);
@@ -51,9 +49,7 @@ const CustomerProfile = () => {
         e.preventDefault();
         try {
             const token = localStorage.getItem('token');
-            await axios.post(`/api/interactions/${id}`, newLog, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            await API.post(`/api/interactions/${id}`, newLog);
             setNewLog({ type: 'Note', notes: '', rating: 5 });
             fetchCustomerData(); // refresh logs
         } catch (error) {

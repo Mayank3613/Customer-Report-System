@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import axios from 'axios';
+import API from '../../utils/api';
 import Sidebar from '../../components/Sidebar';
 import Topbar from '../../components/Topbar';
 import ExportButtons from '../../components/ExportButtons';
@@ -22,9 +22,7 @@ const AuditLogs = () => {
     const fetchLogs = async () => {
         try {
             const token = localStorage.getItem('token');
-            const { data } = await axios.get('/api/audit', {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const { data } = await API.get('/api/audit');
             setLogs(data);
             setLoading(false);
         } catch (error) {

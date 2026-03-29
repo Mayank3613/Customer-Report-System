@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import API from '../../utils/api';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import Topbar from '../../components/Topbar';
@@ -35,12 +35,10 @@ const CustomerList = () => {
     }, []);
 
     const fetchData = async () => {
-        const token = localStorage.getItem('token');
-        const headers = { Authorization: `Bearer ${token}` };
         try {
             const [custRes, repRes] = await Promise.all([
-                axios.get('/api/customers', { headers }),
-                axios.get('/api/reports', { headers })
+                API.get('/api/customers'),
+                API.get('/api/reports')
             ]);
             setCustomers(custRes.data);
             setReports(repRes.data);
@@ -53,9 +51,7 @@ const CustomerList = () => {
         e.preventDefault();
         try {
             const token = localStorage.getItem('token');
-            await axios.post('/api/customers', newCustomer, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            await API.post('/api/customers', newCustomer);
             setShowModal(false);
             setNewCustomer({ name: '', email: '', contact: '', status: 'Active' });
             fetchData();

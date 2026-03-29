@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import API from '../../utils/api';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import Topbar from '../../components/Topbar';
@@ -26,9 +26,7 @@ const AdminDashboard = () => {
         const fetchStats = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const { data } = await axios.get('/api/dashboard/stats', {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                const { data } = await API.get('/api/dashboard/stats');
                 setStats(data);
                 setLoading(false);
             } catch (error) {

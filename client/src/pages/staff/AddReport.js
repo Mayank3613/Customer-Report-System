@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import API from '../../utils/api';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import Topbar from '../../components/Topbar';
@@ -36,9 +36,7 @@ const AddReport = () => {
 
     const fetchCustomers = async () => {
         const token = localStorage.getItem('token');
-        const { data } = await axios.get('/api/customers', {
-            headers: { Authorization: `Bearer ${token}` }
-        });
+        const { data } = await API.get('/api/customers');
         setCustomers(data);
     };
 
@@ -48,11 +46,9 @@ const AddReport = () => {
 
         const selectedCustomer = customers.find(c => c._id === formData.customerId);
 
-        await axios.post('/api/reports', {
+        await API.post('/api/reports', {
             ...formData,
             customerName: selectedCustomer.name
-        }, {
-            headers: { Authorization: `Bearer ${token}` }
         });
 
         alert("Report submitted successfully!");

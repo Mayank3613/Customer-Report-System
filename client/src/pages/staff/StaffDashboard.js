@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import API from '../../utils/api';
 import { Link } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import Topbar from '../../components/Topbar';
@@ -20,11 +20,9 @@ const StaffDashboard = () => {
         const fetchDashboardData = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const headers = { Authorization: `Bearer ${token}` };
-
                 const [customersRes, reportsRes] = await Promise.all([
-                    axios.get('/api/customers', { headers }),
-                    axios.get('/api/reports', { headers })
+                    API.get('/api/customers'),
+                    API.get('/api/reports')
                 ]);
 
                 setData({

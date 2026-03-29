@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import axios from 'axios';
+import API from '../../utils/api';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import Topbar from '../../components/Topbar';
@@ -21,9 +21,7 @@ const SmartInsight = () => {
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
-            const { data } = await axios.get('/api/reports/insights', {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const { data } = await API.get('/api/reports/insights');
             setInsights(data);
         } catch (error) {
             console.error(error);
@@ -36,9 +34,7 @@ const SmartInsight = () => {
         setGenerating(true);
         try {
             const token = localStorage.getItem('token');
-            await axios.post('/api/reports/insights/generate', {}, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            await API.post('/api/reports/insights/generate', {});
             await fetchInsights();
         } catch (error) {
             console.error(error);
