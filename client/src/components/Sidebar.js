@@ -112,12 +112,17 @@ const Sidebar = () => {
                         <li style={{ marginBottom: '0.5rem' }}><Link title="Dashboard" to="/staff" style={getLinkStyle('/staff')}><span>📊</span> {!collapsed && "Dashboard"}</Link></li>
                         <li style={{ marginBottom: '0.5rem' }}><Link title="My Customers" to="/staff/customers" style={getLinkStyle('/staff/customers')}><span>👥</span> {!collapsed && "My Customers"}</Link></li>
                         <li style={{ marginBottom: '0.5rem' }}><Link title="Reports" to="/staff/reports" style={getLinkStyle('/staff/reports')}><span>📑</span> {!collapsed && "Reports"}</Link></li>
-                        <li style={{ marginBottom: '0.5rem' }}><Link title="Profile" to="/staff/profile" style={getLinkStyle('/staff/profile')}><span>👤</span> {!collapsed && "Profile"}</Link></li>
+
                     </>
                 )}
             </ul>
 
             <div style={{ padding: collapsed ? '1rem 0.5rem' : '1rem', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                <li style={{ listStyle: 'none', marginBottom: '0.5rem' }}>
+                    <Link title="Profile" to="/profile" style={getLinkStyle('/profile')}>
+                        <span>👤</span> {!collapsed && "Account Settings"}
+                    </Link>
+                </li>
                 <button title="Logout" onClick={logout} className="btn-logout" style={{
                     width: '100%',
                     padding: collapsed ? '0.75rem 0' : '0.75rem',

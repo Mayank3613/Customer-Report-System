@@ -160,11 +160,24 @@ const CustomerManagement = () => {
                 {/* Form Registration Block */}
                 <div className="glass-card" style={{ marginBottom: '2rem' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                        <h3 style={{ color: 'var(--text-primary)', margin: 0 }}>{editMode ? '⚙️ Edit Client Profile' : '➕ Add New Client Profile'}</h3>
-                        {editMode && <button onClick={resetForm} className="btn btn-sm" style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: 'white' }}>Cancel Edit</button>}
+                        <h3 style={{ color: 'var(--text-primary)', margin: 0 }}>
+                            {editMode ? '⚙️ Edit Client Profile' : '➕ Add New Client Profile'}
+                            {editMode && <span style={{ marginLeft: '15px', background: '#f59e0b', color: '#000', fontSize: '0.7rem', padding: '0.2rem 0.6rem', borderRadius: '4px', verticalAlign: 'middle' }}>EDIT MODE ACTIVE</span>}
+                        </h3>
+                        {editMode && <button onClick={resetForm} className="btn btn-sm" style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#ef4444' }}>Discard Changes</button>}
                     </div>
 
-                    <form onSubmit={handleCreateOrUpdate} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.5rem', alignItems: 'start' }}>
+                    <form onSubmit={handleCreateOrUpdate} style={{ 
+                        display: 'grid', 
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', 
+                        gap: '1.5rem', 
+                        alignItems: 'start',
+                        border: editMode ? '1px solid rgba(245, 158, 11, 0.3)' : '1px solid transparent',
+                        padding: editMode ? '1.5rem' : '0',
+                        borderRadius: '12px',
+                        background: editMode ? 'rgba(245, 158, 11, 0.03)' : 'transparent',
+                        transition: 'all 0.3s ease'
+                    }}>
                         <div>
                             <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '5px' }}>Client Name *</label>
                             <input

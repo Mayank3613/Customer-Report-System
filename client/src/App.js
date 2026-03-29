@@ -41,7 +41,7 @@ function App() {
           <Route path="/staff/customers" element={<ProtectedRoute role="staff"><CustomerList /></ProtectedRoute>} />
           <Route path="/staff/reports" element={<ProtectedRoute role="staff"><StaffReports /></ProtectedRoute>} />
           <Route path="/staff/add-report" element={<ProtectedRoute role="staff"><AddReport /></ProtectedRoute>} />
-          <Route path="/staff/profile" element={<ProtectedRoute role="staff"><Profile /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute role={['admin', 'manager', 'staff']}><Profile /></ProtectedRoute>} />
         </Routes>
       </Router>
     </AuthProvider>
