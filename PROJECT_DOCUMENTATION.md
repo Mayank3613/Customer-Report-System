@@ -66,30 +66,40 @@ The backend is structured using the **MVC (Model-View-Controller)** pattern:
 *Located in `/models`. Defines the structure of data in MongoDB.*
 
 #### **`User.js`**
-**Description:** Schema for system users (Admin and Staff).
+**Description:** Schema for system users (Admin, Manager, and Staff).
 - `name`, `email`: Basic identity.
+- `phone`: Mobile contact (Default: empty).
+- `notifications`: Toggle for email alerts (Default: true).
 - `password`: Hashed using `bcryptjs` for security.
-- `role`: Can be `'admin'` or `'staff'`, used for access control.
-- `resetPasswordToken` & `Expire`: Used for the "Forgot Password" functionality.
+- `role`: Can be `'admin'`, `'manager'`, or `'staff'`, used for access control.
+- `resetPasswordToken` & `Expire`: Used for the secure "Forgot Password" flow.
 - **Methods:**
     - `matchPassword()`: Compares entered password with stored hash.
-    - `getResetPasswordToken()`: Generates a secure token for password recovery and sets a 10-minute expiration.
+    - `getResetPasswordToken()`: Generates a secure hex token, hashes it for DB storage, and sets a 10-minute expiration.
 
 #### **`Customer.js`**
 **Description:** Schema for the clients being managed.
-- `status`: Active, Inactive, or Banned.
+- `name`, `email`, `contact`: Core client identity.
+- `status`: Active, Inactive, Banned, or On Hold.
+- `segment`: Regular, VIP, Standard, or Premium.
 - `riskScore`: Low, Medium, High (Calculated by the system).
-- `healthScore`: 0-100 metric indicating customer health.
-- `ltv`: Lifetime Value (Revenue metric).
+- `healthScore`: 0-100 metric indicating customer relationship health.
+- `ltv`: Lifetime Value (Revenue generated to date).
 - `mrr`: Monthly Recurring Revenue.
-- `lastActivity`: Timestamp of last interaction.
+- `clv`: Customer Lifetime Value (Estimated total value).
+- `pendingPayments`: Outstanding revenue.
+- `assignedTo`: Reference to the Staff member managing the account.
+- `lastActivity`: Timestamp of last interaction (Automatically updated).
 
 #### **`Report.js`**
 **Description:** Schema for complaints, issues, or activity reports.
 - `customerId`: Links the report to a specific Customer.
+- `customerName`: Denormalized name for faster dashboard rendering.
+- `title` & `description`: Details of the issue.
 - `status`: Open, In Progress, Resolved.
 - `priority`: Critical, High, Medium, Low.
-- `title` & `description`: Details of the issue.
+- `assignedTo`: Reference to the Staff/Manager handling the ticket.
+- `staffName`: Name of the assigned agent for visual display.
 
 #### **`Insight.js`**
 **Description:** Stores the generated "Smart Insights" and risk scores.
@@ -111,6 +121,7 @@ The backend is structured using the **MVC (Model-View-Controller)** pattern:
 - `type`: Call, Email, Complaint, Meeting, or Note.
 - `notes`: Content of the interaction.
 - `rating`: 1-5 satisfaction or health metric.
+- `resolvedAt`: Optional date if the interaction was a ticket-closer.
 
 ---
 
@@ -120,7 +131,8 @@ The backend is structured using the **MVC (Model-View-Controller)** pattern:
 #### **`authController.js`**
 - `registerUser`: Creates a new user and returns a JWT token.
 - `loginUser`: Authenticates user credentials and returns a JWT token.
-- `forgotPassword` & `resetPassword`: Handles the secure password reset flow using email tokens.
+- `updateProfile`: Updates current user's profile settings (name, email, phone, notifications).
+- `forgotPassword` & `resetPassword`: Handles the secure password reset flow using SHA-256 hashed email tokens.
 - `getMe`: Returns current user's profile based on the JWT token.
 
 #### **`customerController.js`**
@@ -146,8 +158,9 @@ The backend is structured using the **MVC (Model-View-Controller)** pattern:
 
 #### `dashboardController.js`
 - `getDashboardStats`: Aggregates data for the Admin Dashboard.
-- Counts total customers, active complaints, high-risk accounts.
-- Sums up total MRR (Monthly Recurring Revenue).
+- Counts total customers, active complaints, elevated-risk accounts.
+- **Financial Intelligence**: Sums up `totalMRR` and `totalPendingPayments`.
+- **Growth Analysis**: Generates `monthlySalesTrend` data (revenue and customer growth over time).
 - Prepares distribution data for Charts (Risk Distribution, Report Statuses).
 
 ---
@@ -232,8 +245,8 @@ Built with **React**, utilizing `react-router-dom` for navigation and `axios` fo
 #### **`pages/admin/Reports.js`**
 **Role:** Central Ticket Tracker.
 - Displays all customer issues with advanced filtering (Priority, Status, Date).
-- Supports **Bulk Actions** (Multiselect to resolve or export tickets).
-- Highlights **SLA Violations** for tickets older than 48 hours.
+- **Bulk Actions**: Multiselect to resolve or export tickets via CSV/Excel.
+- **SLA Urgency Tracking**: Highlights **SLA Violations** for tickets older than 48 hours with a visual "SLA Overdue" marker.
 
 #### **`pages/admin/CustomerManagement.js`**
 **Role:** Master Directory Control.
@@ -303,14 +316,14 @@ These standalone scripts help with database management, seeding, and verificatio
 - **Functionality:** Drops deprecated unique indexes to prevent registration errors.
 
 #### `utils/cronJobs.js`
-**Role:** Background Automation.
-- **Daily (8 AM)**: Scans for overdue pending payments and logs alerts.
-- **Weekly (Friday 5 PM)**: Generates a system summary report and sends an email to the admin.
+**Role:** Background Automation & Scheduled Tasks.
+- **Daily (8 AM)**: Scans for overdue payments and health score anomalies, logging system alerts.
+- **Weekly (Friday 5 PM)**: Aggregates system metrics and revenue growth, generating a management summary for administrators.
 
 #### `utils/sendEmail.js`
-**Role:** Email Delivery Utility.
-- Uses `nodemailer` to send automated emails (e.g., password resets).
-- Configured via SMTP settings in the `.env` file.
+**Role:** SMTP Delivery Engine.
+- Uses `nodemailer` to dispatch secure system emails (Password Reset, SLA Alerts).
+- **Fallback Logic**: Logs the email content and reset link to the server console if no SMTP credentials are provided in `.env`.
 
 ---
 
@@ -398,10 +411,10 @@ These standalone scripts help with database management, seeding, and verificatio
 - **Access:** Private (Admin/Manager)
 - **Description:** The core "AI" logic. Iterates through all customers and calculates a **Risk Score**.
     - **Logic:**
-        - **Critical Risk**: Health Score < 50 OR >= 1 Critical Report (Unresolved).
-        - **High Risk**: Health Score < 70 OR >= 3 Open Reports.
-        - **Medium Risk**: Inactivity > 30 days OR >= 1 Open Report.
-        - **Low Risk**: Default.
+        - **High Risk**: Health Score < 50 OR >= 1 Critical Report (Unresolved).
+        - **Elevated Risk**: Health Score < 70 OR >= 3 Open Reports. (Categorized as 'High' in DB).
+        - **Medium Risk**: Inactivity > 30 days OR >= 1 Open Report (Pending follow-up).
+        - **Low Risk**: Stable patterns with active engagement.
     - **Outcome**: Updates `Customer.riskScore` and populates `Insight` with recommendations and `riskFactors`.
 
 #### `getInsights`
@@ -419,9 +432,11 @@ These standalone scripts help with database management, seeding, and verificatio
         - `totalCustomers`: Count of all customers.
         - `activeComplaints`: Count of reports with status 'Open' or 'In Progress'.
         - `highRiskCustomers`: Count of customers with 'High' risk score.
-        - `totalMRR`: Sum of 'Monthly Recurring Revenue' across all customers.
-        - `riskDistribution`: Aggregated count of customers by risk score (for Pie Chart).
-        - `reportStatusDistribution`: Aggregated count of reports by status (for Bar Chart).
+        - `totalMRR`: Total monthly recurring revenue across all segments.
+        - `totalPendingPayments`: Total outstanding revenue awaiting collection.
+        - `monthlySalesTrend`: Time-series growth data for revenue and new accounts.
+        - `riskDistribution`: Aggregated count of customers by risk level (Pie chart).
+        - `reportStatusDistribution`: Current status of all tickets (Bar chart).
 
 ---
 
