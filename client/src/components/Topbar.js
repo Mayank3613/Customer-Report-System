@@ -8,10 +8,12 @@ const Topbar = ({ title }) => {
     const { user } = useContext(AuthContext);
     const [searchTerm, setSearchTerm] = useState('');
     const [showNotifications, setShowNotifications] = useState(false);
+    const [unreadCount, setUnreadCount] = useState(2);
     const [showResults, setShowResults] = useState(false);
     const [searchResults, setSearchResults] = useState({ customers: [], reports: [] });
     const [isSearching, setIsSearching] = useState(false);
     const searchRef = useRef(null);
+    const notificationRef = useRef(null);
     const debounceRef = useRef(null);
 
     const isAdmin = user?.role === 'admin' || user?.role === 'manager';
@@ -21,6 +23,9 @@ const Topbar = ({ title }) => {
         const handleClickOutside = (e) => {
             if (searchRef.current && !searchRef.current.contains(e.target)) {
                 setShowResults(false);
+            }
+            if (notificationRef.current && !notificationRef.current.contains(e.target)) {
+                setShowNotifications(false);
             }
         };
         document.addEventListener('mousedown', handleClickOutside);
@@ -337,7 +342,7 @@ const Topbar = ({ title }) => {
                     )}
                 </div>
 
-                <div style={{ position: 'relative' }}>
+                <div ref={notificationRef} style={{ position: 'relative' }}>
                     <button 
                         onClick={() => setShowNotifications(!showNotifications)}
                         style={{ 
@@ -356,7 +361,9 @@ const Topbar = ({ title }) => {
                     >
                         <span style={{ fontSize: '1.2rem' }}>🔔</span>
                         {/* Notification Badge */}
-                        <span style={{ position: 'absolute', top: '-2px', right: '-2px', background: '#ef4444', width: '12px', height: '12px', borderRadius: '50%', border: '2px solid var(--bg-primary)' }}></span>
+                        {unreadCount > 0 && (
+                            <span style={{ position: 'absolute', top: '-2px', right: '-2px', background: '#ef4444', width: '12px', height: '12px', borderRadius: '50%', border: '2px solid var(--bg-primary)' }}></span>
+                        )}
                     </button>
 
                     {showNotifications && (
@@ -371,19 +378,34 @@ const Topbar = ({ title }) => {
                         }}>
                             <h4 style={{ margin: '0 0 1rem 0', color: 'var(--text-primary)', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '0.5rem' }}>Notifications</h4>
                             
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
-                                <div style={{ background: 'rgba(239, 68, 68, 0.1)', padding: '0.8rem', borderRadius: '8px', borderLeft: '3px solid #ef4444' }}>
-                                    <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-primary)' }}><strong>SLA Alert:</strong> Resolution time exceeded for 2 reports.</p>
-                                    <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Just now</span>
+                            {unreadCount > 0 ? (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                                    <div style={{ background: 'rgba(239, 68, 68, 0.1)', padding: '0.8rem', borderRadius: '8px', borderLeft: '3px solid #ef4444' }}>
+                                        <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-primary)' }}><strong>SLA Alert:</strong> Resolution time exceeded for 2 reports.</p>
+                                        <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Just now</span>
+                                    </div>
+                                    <div style={{ background: 'rgba(245, 158, 11, 0.1)', padding: '0.8rem', borderRadius: '8px', borderLeft: '3px solid #f59e0b' }}>
+                                        <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-primary)' }}><strong>Task:</strong> 3 Customer Follow-ups scheduled for today.</p>
+                                        <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>2 hours ago</span>
+                                    </div>
                                 </div>
-                                <div style={{ background: 'rgba(245, 158, 11, 0.1)', padding: '0.8rem', borderRadius: '8px', borderLeft: '3px solid #f59e0b' }}>
-                                    <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-primary)' }}><strong>Task:</strong> 3 Customer Follow-ups scheduled for today.</p>
-                                    <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>2 hours ago</span>
+                            ) : (
+                                <div style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+                                    <span style={{ fontSize: '2rem', display: 'block', marginBottom: '0.5rem', opacity: 0.5 }}>📭</span>
+                                    <p style={{ margin: 0, fontSize: '0.9rem' }}>You're caught up!</p>
                                 </div>
-                            </div>
-                            <div style={{ textAlign: 'center', marginTop: '1rem' }}>
-                                <button onClick={() => setShowNotifications(false)} style={{ background: 'transparent', border: 'none', color: '#818cf8', cursor: 'pointer', fontSize: '0.8rem' }}>Mark all as read</button>
-                            </div>
+                            )}
+
+                            {unreadCount > 0 && (
+                                <div style={{ textAlign: 'center', marginTop: '1rem' }}>
+                                    <button 
+                                        onClick={() => setUnreadCount(0)} 
+                                        style={{ background: 'transparent', border: 'none', color: '#818cf8', cursor: 'pointer', fontSize: '0.8rem' }}
+                                    >
+                                        Mark all as read
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
